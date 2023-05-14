@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "122290392444",
+    "project_id": "mappingmemoriesapp-385617",
+    "storage_bucket": "mappingmemoriesapp-385617.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:122290392444:android:746f5d81572b4a9cc868f9",
+        "android_client_info": {
+          "package_name": "com.example.mappingmemoriesapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "122290392444-073p0gdhqp84d51tt86k69cbbqa7k9nn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCblpVuu8PTZ0D6Adq2UWYiQ9jjS3Gi0TI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "122290392444-073p0gdhqp84d51tt86k69cbbqa7k9nn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

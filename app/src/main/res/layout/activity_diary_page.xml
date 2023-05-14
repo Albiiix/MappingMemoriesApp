@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@drawable/paper"
+        tools:context=".DiaryPage">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/titletextview"
+                android:text="Nueva página"
+                android:textColor="@color/dark_brown"
+                android:textSize="26dp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_margin="20dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="10dp"
+                android:layout_margin="10dp">
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/titleinput"
+                    android:hint="Title"
+                    android:textStyle="bold"
+                    android:padding="10dp"
+                    android:textColor="@color/brown"
+                    android:background="@color/white2"
+                    android:layout_margin="10dp"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/geopoint"
+                    android:hint="Geopoint"
+                    android:lines="2"
+                    android:textStyle="italic"
+                    android:padding="3dp"
+                    android:textColor="@color/dark_brown"
+                    android:layout_margin="4dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/timestamp"
+                    android:hint="Timestamp"
+                    android:lines="2"
+                    android:textStyle="italic"
+                    android:padding="3dp"
+                    android:textColor="@color/dark_brown"
+                    android:layout_margin="4dp"/>
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textinput"
+                    android:hint="Text"
+                    android:textStyle="bold"
+                    android:textColor="@color/brown"
+                    android:padding="10dp"
+                    android:layout_margin="10dp"
+                    android:lines="15"
+                    android:gravity="top"/>
+
+                <ImageView
+                    android:id="@+id/imageView"
+                    android:layout_width="250dp"
+                    android:layout_height="250dp"
+                    android:layout_gravity="center"
+                    android:scaleType="centerCrop"
+                    android:clickable="true"
+                    android:src="@drawable/_057198_image_icon" />
+
+
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/savebtn"
+                android:text="SAVE "
+                android:layout_gravity="center"
+                android:backgroundTint="@color/brown_pink"
+                android:textColor="@color/dark_brown"/>
+
+        </LinearLayout>
+
+
+    </ScrollView>
+
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"/>
+
+
+    </LinearLayout>
+
