@@ -2,8 +2,6 @@ package com.example.mappingmemoriesapp.Models;
 
 import android.app.Application;
 
-import com.example.mappingmemoriesapp.Models.User;
-
 public class UserClient extends Application {
 
     //Clase para establecer el usuario actual

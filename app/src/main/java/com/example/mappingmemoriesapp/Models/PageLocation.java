@@ -2,12 +2,8 @@ package com.example.mappingmemoriesapp.Models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.widget.ImageView;
-import android.widget.TextView;
-
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ServerTimestamp;
-
 import java.util.Date;
 
 public class PageLocation implements Parcelable{
