@@ -10,20 +10,21 @@ import java.util.Date;
 
 public class UserLocation implements Parcelable{
 
+    //Clase para representar la ubicación de un usuario
+
     private User user;
     private GeoPoint geo_point;
     private @ServerTimestamp
     Date timestamp;
 
+    //Constructores
     public UserLocation(User user, GeoPoint geo_point, Date timestamp) {
         this.user = user;
         this.geo_point = geo_point;
         this.timestamp = timestamp;
     }
 
-    public UserLocation() {
-
-    }
+    public UserLocation() {}
 
     protected UserLocation(Parcel in) {
         user = in.readParcelable(User.class.getClassLoader());
@@ -41,6 +42,7 @@ public class UserLocation implements Parcelable{
         }
     };
 
+    //Getters & Setters
     public User getUser() {
         return user;
     }

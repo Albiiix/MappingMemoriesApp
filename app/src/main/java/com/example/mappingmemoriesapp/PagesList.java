@@ -8,6 +8,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.graphics.pdf.PdfDocument;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
@@ -28,6 +29,8 @@ import java.util.Date;
 import java.util.List;
 
 public class PagesList extends AppCompatActivity{
+
+    private static final String TAG = "PagesList";
 
     List<PageLocation> pagesList = new ArrayList<>();
     RecyclerView recyclerView;
@@ -54,6 +57,7 @@ public class PagesList extends AppCompatActivity{
         listAdapter= new ListAdapter(PagesList.this, pagesList);
         recyclerView.setAdapter(listAdapter);
 
+        //Para refrescar la página cuando se elimina o busca
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -62,6 +66,7 @@ public class PagesList extends AppCompatActivity{
             }
         });
 
+        //Buscador por titulo/fecha/dirección
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -76,6 +81,7 @@ public class PagesList extends AppCompatActivity{
         });
     }
 
+    //Carga las páginas de diario del usuario
     private void loadPagesList() {
         showDialog();
         FirebaseFirestore.getInstance().collection("PageLocations")
@@ -95,7 +101,7 @@ public class PagesList extends AppCompatActivity{
                                     pageLocation.setTimestamp(timestamp.toDate());
                                     pagesList.add(pageLocation);
                                 }
-
+                                Log.d(TAG, "loadPagesList:onComplete: succesful" + task.isSuccessful());
                             }
                             listAdapter.notifyDataSetChanged();
                         }

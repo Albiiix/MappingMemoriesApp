@@ -45,12 +45,7 @@ public class DiaryPage extends AppCompatActivity {
 
     private static final String TAG = "DiaryPage";
 
-    private TextView titletextview, geoPoint, timestamp;
-    private EditText titleinput, textinput;
-    private MaterialButton savebtn;
-    private ImageView imageView;
-    private Uri uri;
-
+    //Firebase
     private FirebaseFirestore firebaseFirestore;
 
     private String documentId;
@@ -62,6 +57,12 @@ public class DiaryPage extends AppCompatActivity {
 
     //widgets
     private ProgressBar progressBar;
+
+    private TextView titletextview, geoPoint, timestamp;
+    private EditText titleinput, textinput;
+    private MaterialButton savebtn;
+    private ImageView imageView;
+    private Uri uri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +81,7 @@ public class DiaryPage extends AppCompatActivity {
 
         firebaseFirestore = FirebaseFirestore.getInstance();
 
+        //Obtiene el intent para comprobar si es una nueva página o una existente
         extras = getIntent().getExtras();
         if(extras.getBoolean("isNewPage")){
             setDirection(extras.getDouble("geoPoint_lat"), extras.getDouble("geoPoint_lon"));
@@ -91,20 +93,19 @@ public class DiaryPage extends AppCompatActivity {
             searchDocument();
         }
 
+        //Botón para guardar los cambios
         savebtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(extras.getBoolean("isNewPage")){
                     saveNewPage();
-                    Toast.makeText(DiaryPage.this, "Pagina guardada", Toast.LENGTH_SHORT).show();
-                    Intent intent1= new Intent(DiaryPage.this, MainActivity.class);
-                    startActivity(intent1);
                 }else{
                     uploadPage();
                 }
             }
         });
 
+        //Launcher para cargar una imagen de galeria
         launcher = registerForActivityResult(
                 new ActivityResultContracts.GetContent(),
                 new ActivityResultCallback<Uri>() {
@@ -118,6 +119,7 @@ public class DiaryPage extends AppCompatActivity {
                 }
         );
 
+        //ImageView para mostrar una imagen de galeria
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -126,6 +128,7 @@ public class DiaryPage extends AppCompatActivity {
         });
     }
 
+    //Actualiza la pagina existente con los datos que han sido modificados de la misma
     private void uploadPage() {
         showDialog();
 
@@ -138,12 +141,10 @@ public class DiaryPage extends AppCompatActivity {
             pageLocation.setImage("0");
         }
 
-
         firebaseFirestore.collection("PageLocations").document(documentId).update(
                 "title", pageLocation.getTitle(),
                 "text", pageLocation.getText(),
-                "timestamp", pageLocation.getTimestamp(),
-                "geo_point", pageLocation.getGeo_point()
+                "image", pageLocation.getImage()
         ).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -151,12 +152,18 @@ public class DiaryPage extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     Log.d(TAG, "uploadPage: Updated page location in Firestore." +
                             "\npageLocation: " + pageLocation.toString());
+
+                    Toast.makeText(DiaryPage.this, "Pagina guardada", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(DiaryPage.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
                 }
             }
         });
 
     }
 
+    //Busca el documento existente en la base de datos de Firebase
     private void searchDocument() {
         showDialog();
 
@@ -174,21 +181,24 @@ public class DiaryPage extends AppCompatActivity {
                     if (!lista.isEmpty()) {
                         documentId = lista.get(0).getId();// ID del primer documento encontrado
 
-                        loadData();
+                        Log.d(TAG, "searchDocument: document found:" + documentId);
 
+                        loadData();
                     }
                 }
             }
         });
     }
 
-
+    //Se cargan los datos de una página existente en Firebase del usuario
     private void loadData() {
         showDialog();
+
         firebaseFirestore.collection("PageLocations").document(documentId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 hideDialog();
+
                 if(task.isSuccessful()) {
                     DocumentSnapshot documentSnapshot = task.getResult();
                     if(documentSnapshot.exists()){
@@ -200,18 +210,24 @@ public class DiaryPage extends AppCompatActivity {
                         }
                         Uri uri1 = Uri.parse(documentSnapshot.getString("image"));
                         imageView.setImageURI(uri1);
+
+                        Log.d(TAG, "loadData: data loaded succesfully");
                     }
+                }else{
+                    Log.d(TAG, "loadData: data could not be loaded");
                 }
             }
         });
     }
 
+    //Guarda una nueva página en la base de datos
     private void saveNewPage() {
         showDialog();
-        PageLocation pageLocation= new PageLocation();
 
+        PageLocation pageLocation= new PageLocation();
         pageLocation.setUser_id(FirebaseAuth.getInstance().getUid());
 
+        //Comprueba si hay imagen
         if(uri != null){
             pageLocation.setImage(uri.toString());
         } else {
@@ -226,14 +242,20 @@ public class DiaryPage extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<DocumentReference> task) {
                 hideDialog();
+
                 if(task.isSuccessful()){
                     Log.d(TAG, "savePageLocation: \ninserted page location into database." +
                             "\n pageLocation: " + pageLocation.toString());
+                    Toast.makeText(DiaryPage.this, "Pagina guardada", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(DiaryPage.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
                 }
             }
         });
     }
 
+    //Método para establecer una dirección a partir de unas coordenadas
     public void setDirection(Double lat, Double lon){
         geoPoint.setText("[" + lat + "," + lon + "]");
 
@@ -246,8 +268,11 @@ public class DiaryPage extends AppCompatActivity {
             String address = addresses.get(0).getAddressLine(0);
             geoPoint.setText("[" + lat + "," + lon + "] " + address);
 
+            Log.d(TAG, "setDirection: direction set:" + geoPoint.getText());
+
         } catch (IOException e) {
             e.printStackTrace();
+            Log.d(TAG, "setDirection: direction not set");
         }
 
     }

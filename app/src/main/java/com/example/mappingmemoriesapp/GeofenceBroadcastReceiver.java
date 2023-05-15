@@ -22,26 +22,21 @@ import com.google.firebase.messaging.RemoteMessage;
 
 public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
-    private  String token;
+    //Clase para recibir y manejar eventos de las geofences
+
     private static final String CHANNEL_ID = "geofence_channel";
     private static final int NOTIFICATION_ID = 123;
     private static final String GEOFENCE_ACTION = "com.example.ACTION_GEOFENCE";
 
-    public void setToken(String token) {
-        this.token = token;
-    }
-
+    //Verifica si se entra en la geofence
     @Override
     public void onReceive(Context context, Intent intent) {
 
         if (GeofencingEvent.fromIntent(intent).getGeofenceTransition() == Geofence.GEOFENCE_TRANSITION_ENTER) {
-            // Crear un Intent con la acción personalizada
             Intent geofenceIntent = new Intent(GEOFENCE_ACTION);
-
-            // Envía la transmisión con el Intent
             context.sendBroadcast(geofenceIntent);
 
-            // Mostrar la notificación
+            //mostrar la notificación
             showNotification(context);
         }
     }
@@ -51,22 +46,20 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
         // Crear y configurar la notificación
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.notification_icon)
-                .setContentTitle("Geofence Notification")
-                .setContentText("You have entered a geofence")
+                .setContentTitle("¡Ubicación guardada cerca de ti!")
+                .setContentText("Estas pasando cerca de una ubicación que has guardado ¿quieres verla?")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
-        // Crear el canal de notificación para dispositivos con Android 8.0 o posterior
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence channelName = "Geofence Channel";
-            String channelDescription = "Channel for geofence notifications";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, channelName, importance);
-            channel.setDescription(channelDescription);
+        // Crear el canal de notificación
+        CharSequence channelName = "Geofence Channel";
+        String channelDescription = "Channel for geofence notifications";
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, channelName, importance);
+        channel.setDescription(channelDescription);
 
-            // Registrar el canal de notificación en el administrador de notificaciones
-            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
+        // Registrar el canal de notificación en el administrador de notificaciones
+        NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
 
         Intent notificationIntent = new Intent(context, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
@@ -75,48 +68,5 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
         // Mostrar la notificación
         NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
         notificationManagerCompat.notify(NOTIFICATION_ID, builder.build());
-
-        System.out.println("NOTIFICACION!!!!!!!: ");
-
-
-/*
-        FirebaseMessaging.getInstance().getToken()
-                .addOnCompleteListener(new OnCompleteListener<String>() {
-                    @Override
-                    public void onComplete(@NonNull Task<String> task) {
-                        if(!task.isSuccessful()){
-                            Log.w("GeofenceReceiver", "Fetching FCM registration token failed", task.getException());
-                            return;
-                        }
-
-                        token = task.getResult();
-                        Log.d("GeofenceReceiver", "FCM registration token: " + token);
-
-                        System.out.println("ESTA DEBERIA SER EL TOKEN!!!!!!!: " + token);
-
-                        // Construir el mensaje de notificación
-                        RemoteMessage.Builder remoteMessageBuilder = new RemoteMessage.Builder("122290392444" + "@fcm.googleapis.com")
-                                .setMessageId(Integer.toString(getNextMessageId()))
-                                .addData("title", title)
-                                .addData("body", body)
-                                .addData("click_action", "OPEN_ACTIVITY")
-                                .addData("token", token); // Acción al hacer clic en la notificación
-
-                        // Enviar la notificación mediante FirebaseMessaging
-                        FirebaseMessaging.getInstance().send(remoteMessageBuilder.build());
-                        System.out.println("DEBERIA HABERSE MANDADO MENSAJE!!!!!!!: ");
-
-
-                    }
-                });
-
-*/
-
-    }
-
-    private int getNextMessageId() {
-        // Generar un ID único para cada mensaje de notificación
-        // Aquí puedes implementar tu lógica para generar un ID único, por ejemplo, utilizando un contador o una marca de tiempo
-        return (int) System.currentTimeMillis();
     }
 }

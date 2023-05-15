@@ -89,7 +89,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Marker lastClickedMarker = null;
     private List<MarkerOptions> markerList = new ArrayList<MarkerOptions>();
 
-    private String token;
     private GeofencingClient geofencingClient;
     private GeofenceBroadcastReceiver geofenceBroadcastReceiver;
     private static final String GEOFENCE_ACTION = "com.example.ACTION_GEOFENCE";
@@ -97,7 +96,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     double userLatitude;
     double userLongitude;
-    private List<Double> distanciasMarkers = new ArrayList<Double>();
 
     private ActivityResultLauncher<Intent> enableGpsLauncher;
 
@@ -109,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         progressBar = findViewById(R.id.progressBar);
         mMapView = findViewById(R.id.user_map);
 
+        //Botón para crear una nueva página de diario para guardar la ubicación
         findViewById(R.id.fab_create_poi).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -118,11 +117,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 builder.setPositiveButton("Más tarde", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+
+                        Log.d(TAG, "onClick: positive button clicked: save location for later");
+
                         saveLocationForLater();
+
                         MarkerOptions markerOptions = new MarkerOptions();
                         LatLng latLng = new LatLng(userLocation.getGeo_point().getLatitude(), userLocation.getGeo_point().getLongitude());
                         markerOptions.position(latLng);
-                        // markerOptions.title();
                         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
                         googleMap.addMarker(markerOptions);
                     }
@@ -130,6 +132,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 builder.setNegativeButton("Ahora", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+
+                        Log.d(TAG, "onClick: negative button clicked: save location and info");
+
                         getLastKnownLocation();
                         Intent intent= new Intent(MainActivity.this, DiaryPage.class);
                         intent.putExtra("geoPoint_lat", userLocation.getGeo_point().getLatitude());
@@ -141,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 builder.setNeutralButton("Cancelar", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
+                        Log.d(TAG, "onClick: neutral button clicked");
                     }
                 });
 
@@ -150,9 +155,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        //Boton para leer las páginas de diario guardadas
         findViewById(R.id.fab_read).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                Log.d(TAG, "onClick: read diary clicked");
+
                 Intent intent= new Intent(MainActivity.this, PagesList.class);
                 startActivity(intent);
             }
@@ -162,8 +171,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK) {
+                        Log.d(TAG, "enableGpsLauncher: result OK");
                         getLastKnownLocation();
                     } else {
+                        Log.d(TAG, "enableGpsLauncher: GPS not enabled");
                         Toast.makeText(this, "El GPS no está habilitado", Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -171,14 +182,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mMapView.getMapAsync(this);
 
+        //Instanciar Firebase
         firebaseFirestore = FirebaseFirestore.getInstance();
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
+        //Iniciar mapa
         initGoogleMap(savedInstanceState);
 
+        //Localizacion
         userLocation = new UserLocation();
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
+        //Geofences
         geofencingClient = LocationServices.getGeofencingClient(this);
 
         geofenceBroadcastReceiver = new GeofenceBroadcastReceiver();
@@ -193,9 +207,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-
+    //Guardar la ubicación para completar la información después
     private void saveLocationForLater() {
         showDialog();
+
         if(userLocation != null){
 
             pageLocation= new PageLocation();
@@ -222,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-
+    //Método para inicializar el mapa de google
     private void initGoogleMap(Bundle savedInstanceState){
         Bundle mapViewBundle = null;
         if (savedInstanceState != null) {
@@ -234,6 +249,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMapView.getMapAsync(this);
     }
 
+    //Método para guardar el estado actual del mapa de Google
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -247,6 +263,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMapView.onSaveInstanceState(mapViewBundle);
     }
 
+    //Método para verificar si los servicios de Google Play y ubicación están habilitados
     private boolean checkMapServices(){
         if(isServicesOK()){
             if(isMapsEnabled()){
@@ -256,6 +273,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return false;
     }
 
+    //Verifica la disponibilidad y versión de los servicios Google Play
     public boolean isServicesOK(){
         Log.d(TAG, "isServicesOK: checking google services version");
 
@@ -277,6 +295,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return false;
     }
 
+    //Verifica si la ubicación está habilitada
     public boolean isMapsEnabled(){
         final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
 
@@ -287,6 +306,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return true;
     }
 
+    //Alerta al usuario cuando la función de ubicación no está habilitada
     private void buildAlertMessageNoGps() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Esta aplicación requiere GPS para funcionar correctamente, ¿quieres habilitarlo?")
@@ -300,6 +320,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         alert.show();
     }
 
+    //Método para manejar la respuesta del usuario cuando se le soliciten los permisos necesarios
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String permissions[],
@@ -317,7 +338,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-
+    //Comprobar si se ha concedido el permiso de ubicación y solicitarlo en caso contrario
     private void getLocationPermission() {
 
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
@@ -332,14 +353,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
         mMapView.onDestroy();
         unregisterReceiver(geofenceBroadcastReceiver);
         geofencingClient.removeGeofences(geofencePendingIntent);
-
     }
 
     @Override
@@ -367,7 +386,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onStop();
         mMapView.onStop();
         geofencingClient.removeGeofences(geofencePendingIntent);
-
     }
 
     @Override
@@ -376,13 +394,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onPause();
     }
 
-
     @Override
     public void onLowMemory() {
         super.onLowMemory();
         mMapView.onLowMemory();
     }
 
+    //Cerrar sesión
     private void signOut(){
         FirebaseAuth.getInstance().signOut();
         Intent intent = new Intent(this, LoginActivity.class);
@@ -397,7 +415,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return super.onCreateOptionsMenu(menu);
     }
 
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
@@ -409,9 +426,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return super.onOptionsItemSelected(item);
             }
         }
-
     }
 
+    //Método para cuando el google map puede usarse
     @Override
     public void onMapReady(GoogleMap map) {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -425,13 +442,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         googleMap.setOnMarkerClickListener(this);
     }
 
+    //Función para mostrar los markers guardados por el usuario en el mapa
     private void showMarkers() {
-        showDialog();
         firebaseFirestore.collection("PageLocations").whereEqualTo("user_id", FirebaseAuth.getInstance().getUid())
                 .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        hideDialog();
                         if(task.isSuccessful()){
                             List<DocumentSnapshot> lista = task.getResult().getDocuments();
                             if(!lista.isEmpty()){
@@ -457,12 +473,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());
                         }
-                        distanceWithMarkers(); 
+                        distanceWithMarkers();
 
                     }
                 });
     }
 
+    //Función cuando se hace click en un marcador
     @Override
     public boolean onMarkerClick(Marker marker) {
         String markerTitle = marker.getTitle();
@@ -496,7 +513,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return true;
     }
 
-
+    //Establece la vista de la cámara del mapa
     private void setCameraView(){
         double bottomBoundary = userLocation.getGeo_point().getLatitude()- .1;
         double leftBoundary = userLocation.getGeo_point().getLongitude()- .1;
@@ -508,6 +525,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mapBoundary, 0));
     }
 
+    //Solicita la ultima ubicación del usuario
     private void getLastKnownLocation() {
         Log.d(TAG, "getLastKnownLocation: called.");
         showDialog();
@@ -552,10 +570,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 }
             }
-
         });
     }
 
+    //Establece las geofences y calcula la distancia con el usuario
     private void distanceWithMarkers() {
 
         for(int i= 0; i< markerList.size(); i++){
@@ -574,22 +592,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             GeofencingRequest geofencingRequest = new GeofencingRequest.Builder()
                     .addGeofence(geofence)
                     .build();
-
             geofencingClient.addGeofences(geofencingRequest, getGeofencePendingIntent());
-            System.out.println("GEOFENCES!!!!!!!: "+ geofencingRequest);
 
             double distancia = calculateDistance(positionLat, positionLon);
             if(distancia < geofence.getRadius()){
-                System.out.println("ESTA DENTRO DEBERIA MANDARSE NOTIFICACION!!!!!!!: ");
                 geofenceBroadcastReceiver.showNotification(this);
             }
         }
-
-
     }
 
+    //Calcula la distancia entre el marcador y el usuario
     private Double calculateDistance(double positionLat, double positionLon) {
-
         double radio_tierra = 6371;
 
         double positionLat_radianes = Math.toRadians(positionLat);
@@ -605,8 +618,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         double distancia = radio_tierra * c *1000; //metros
 
-        //distanciasMarkers.add(distancia);
-        System.out.println("Distancia!!!!!!!: " + distancia + " metros");
         return distancia;
     }
 

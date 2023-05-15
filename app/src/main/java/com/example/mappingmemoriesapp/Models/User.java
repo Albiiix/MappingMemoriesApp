@@ -6,27 +6,25 @@ import android.os.Parcelable;
 
 public class User implements Parcelable {
 
+    //Clase para almacenar los datos de un usuario
+
     private String email;
     private String user_id;
     private String username;
-    private String avatar;
 
+    //Constructores
     public User(String email, String user_id, String username, String avatar) {
         this.email = email;
         this.user_id = user_id;
         this.username = username;
-        this.avatar = avatar;
     }
 
-    public User() {
-
-    }
+    public User() {}
 
     protected User(Parcel in) {
         email = in.readString();
         user_id = in.readString();
         username = in.readString();
-        avatar = in.readString();
     }
 
     public static final Creator<User> CREATOR = new Creator<User>() {
@@ -41,14 +39,7 @@ public class User implements Parcelable {
         }
     };
 
-    public String getAvatar() {
-        return avatar;
-    }
-
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
-    }
-
+    //Getters & Setters
     public static Creator<User> getCREATOR() {
         return CREATOR;
     }
@@ -83,7 +74,6 @@ public class User implements Parcelable {
                 "email='" + email + '\'' +
                 ", user_id='" + user_id + '\'' +
                 ", username='" + username + '\'' +
-                ", avatar='" + avatar + '\'' +
                 '}';
     }
 
@@ -97,6 +87,5 @@ public class User implements Parcelable {
         dest.writeString(email);
         dest.writeString(user_id);
         dest.writeString(username);
-        dest.writeString(avatar);
     }
 }
